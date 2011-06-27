@@ -1,0 +1,47 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.68.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It will check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
+
+SHA1 da217496860387a2833bec0b3376227bcfc3c1d6 Build.PL
+SHA1 d0f2060d740ce428f14c47b7f9cc2c65bf66cd7b COPYING
+SHA1 93de4df16ede4f192f9f15afcfdab2227f078043 Changelog
+SHA1 69044c20f009be8bdfe154a68b34db4187db6f24 MANIFEST
+SHA1 5dc0310e1a44972a91b0f618a08479a7a96992ef META.json
+SHA1 da7c7125bea05213a6d61b459b52182085eb55e8 META.yml
+SHA1 57d264edff2b9a955b13a068a8fc376da2d2a0a5 README
+SHA1 138cc813aa9fbdf8969212297ab8d8688140b4de bin/db-ris
+SHA1 e16e7ae978e17f42ae0090869b6d34e988cd3578 lib/Travel/Status/DE/DeutscheBahn.pm
+SHA1 d7150fcbc7b9cc194e688af981509ee35565ced5 lib/Travel/Status/DE/DeutscheBahn/Result.pm
+SHA1 6cfaebdb4d57688b8ac50f3e840a99a48c15457b t/00-compile-pm.t
+SHA1 3adfc7da6082f15051da7fbda884723388738b61 t/01-compile-pl.t
+SHA1 fd251ffc56ca6e52020c906b61158f78b035679d t/10-pod-coverage.t
+SHA1 c52e752f089f38edb3baa206699018167cdb6249 t/20-db.t
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iQIcBAEBCAAGBQJOCPssAAoJEBANW/tRZuAFpT8QAM8zKvdPS1FeTEMFBD3l8fK0
+5SyAIUaoJwgynNZrYQ7thplA0IeiwKw8g+IIC2NGbbZ4QHlw6SzUSF88xf5mMzfh
+gMJpbqweFJG23bbDkwLsG+AHiBuE9zgerABk228a21NMGiptGhUrVF4P3tTBMqKc
+1fQlYULg8jbUmq1glJqCJlW/pDBcfrpwf53Dgt95ZwD7Nhzc5M5y9Gx6B8ZnorY6
+8kvo1o7/ZEgoVRtY+Br0G5DscmP2cPWv/jkmWoH5TVMdDUxKybgBFrPFiRx/z8jh
+wjOwoV2z7w/m9If9yEAvRizLeeBSd3Anb7OvS1dvFaDXaIU7dX2jxVlzb0v66wyO
+4E+eWWQnuEVnHWBAE8pCDj/CmHkIMNvHfoULc6kNRKX0sZ9oU28dKYMBgQKgEOVz
+LTB5dqOPuhikayRY2CAmp5xN/sdThFKGtfdfsBmefaV9WEg4kuxZ4PtTHVhdblwO
+g5bQFFpD5cEzy9/xbJB+APNfneW1pMhEr7kNvyAc3zj9YEDmNkMjQQAK7wTj5u5v
+0C3dgCf/0dZvYtr9iAFwqcrr3UfrXbAfi220slIV5JcSHM5yxvgKwQrjqFCFNnVC
+ZgMinhJza2WoAAHJjp9BwfQKLAP7HyLVRLGqXQ8it6GPQtOH3n55Iy34+en2bnNi
+H4pR18bZQzKFF6PljR0X
+=7vJe
+-----END PGP SIGNATURE-----
