@@ -10,7 +10,7 @@ use POSIX qw(strftime);
 use Travel::Status::DE::DeutscheBahn::Result;
 use XML::LibXML;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 sub new {
 	my ( $obj, %conf ) = @_;
@@ -18,6 +18,8 @@ sub new {
 	my $time = strftime( '%H:%M',    localtime(time) );
 
 	my $ua = LWP::UserAgent->new();
+
+	my $reply;
 
 	if ( not $conf{station} ) {
 		confess('You need to specify a station');
@@ -52,9 +54,15 @@ sub new {
 		}
 	}
 
-	$ref->{html}
-	  = $ua->post( 'http://reiseauskunft.bahn.de/bin/bhftafel.exe/dn?rt=1',
-		$ref->{post} )->content();
+	$reply = $ua->post( 'http://reiseauskunft.bahn.de/bin/bhftafel.exe/dn?rt=1',
+		$ref->{post} );
+
+	if ( $reply->is_error ) {
+		my $errstr = $reply->status_line();
+		confess("Could not submit POST request: ${errstr}");
+	}
+
+	$ref->{html} = $reply->content();
 
 	$ref->{tree} = XML::LibXML->load_html(
 		string            => $ref->{html},
@@ -67,9 +75,14 @@ sub new {
 }
 
 sub new_from_html {
-	my ( $obj, $html ) = @_;
+	my ( $obj, %opt ) = @_;
 
-	my $ref = { html => $html, };
+	my $ref = {
+		html => $opt{html},
+		post => { boardType => $opt{mode} // 'dep' }
+	};
+
+	$ref->{post}->{boardType} = $opt{mode} // 'dep';
 
 	$ref->{tree} = XML::LibXML->load_html(
 		string            => $ref->{html},
@@ -127,7 +140,8 @@ sub results {
 			$str =~ tr/ //s;
 		}
 
-		$info =~ s/,Grund//;
+		$info =~ s{ ,Grund }{}ox;
+		$info =~ s{ ^ \s+ }{}ox;
 
 		while ( $route =~ m{$re_via}g ) {
 			if ($first) {
@@ -135,6 +149,11 @@ sub results {
 				next;
 			}
 			my $stop = $1;
+
+			if ( $stop =~ m{ [(] Halt \s entf.llt [)] }ox ) {
+				next;
+			}
+
 			push( @via, $stop );
 		}
 
@@ -184,7 +203,7 @@ arrival/departure monitor
 
 =head1 VERSION
 
-version 0.01
+version 0.02
 
 =head1 DESCRIPTION
 

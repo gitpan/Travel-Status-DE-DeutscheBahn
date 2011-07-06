@@ -6,10 +6,10 @@ use 5.010;
 
 use parent 'Class::Accessor';
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 Travel::Status::DE::DeutscheBahn::Result->mk_ro_accessors(
-	qw(time train route_end platform info));
+	qw(time train route_end route_raw platform info));
 
 sub new {
 	my ( $obj, %conf ) = @_;
@@ -71,7 +71,7 @@ arrival/departure received by Travel::Status::DE::DeutscheBahn
 
 =head1 VERSION
 
-version 0.01
+version 0.02
 
 =head1 DESCRIPTION
 
@@ -111,6 +111,13 @@ arrive.
 
 Returns a list of station names the train will pass between the selected
 station and its origin/destination.
+
+=item $result->route_raw
+
+Returns the raw string used to create the route array.
+
+Note that canceled stops are filtered from B<route>, but still present in
+B<route_raw>.
 
 =item $result->time
 
