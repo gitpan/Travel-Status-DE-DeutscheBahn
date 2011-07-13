@@ -10,7 +10,7 @@ use POSIX qw(strftime);
 use Travel::Status::DE::DeutscheBahn::Result;
 use XML::LibXML;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 sub new {
 	my ( $obj, %conf ) = @_;
@@ -142,9 +142,6 @@ sub results {
 			$str =~ s/ +$//;
 		}
 
-		$info =~ s{ ,Grund }{}ox;
-		$info =~ s{ ^ \s+ }{}ox;
-
 		while ( $route =~ m{$re_via}g ) {
 			if ($first) {
 				$first = 0;
@@ -168,7 +165,7 @@ sub results {
 				route     => \@via,
 				route_end => $dest,
 				platform  => $platform,
-				info      => $info,
+				info_raw  => $info,
 			)
 		);
 	}
@@ -205,7 +202,7 @@ arrival/departure monitor
 
 =head1 VERSION
 
-version 0.03
+version 0.04
 
 =head1 DESCRIPTION
 
@@ -283,8 +280,7 @@ None.
 
 =head1 BUGS AND LIMITATIONS
 
-In the web interface, a train's route contains station names and the
-corresponding arrival times.  These times are not yet accessible.
+There are a few character encoding issues.
 
 =head1 SEE ALSO
 
