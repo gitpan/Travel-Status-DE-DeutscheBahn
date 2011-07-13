@@ -3,6 +3,7 @@ abstract: "Interface to the DeutscheBahn online\narrival/departure monitor"
 author:
   - 'Copyright (C) 2011 by Daniel Friesel E<lt>derf@finalrewind.orgE<gt>'
 build_requires:
+  File::Slurp: 0
   Test::Compile: 0
   Test::More: 0
   Test::Pod: 0
@@ -17,10 +18,10 @@ name: Travel-Status-DE-DeutscheBahn
 provides:
   Travel::Status::DE::DeutscheBahn:
     file: lib/Travel/Status/DE/DeutscheBahn.pm
-    version: 0.02
+    version: 0.03
   Travel::Status::DE::DeutscheBahn::Result:
     file: lib/Travel/Status/DE/DeutscheBahn/Result.pm
-    version: 0.02
+    version: 0.03
 requires:
   Carp: 0
   Class::Accessor: 0.16
@@ -29,7 +30,7 @@ requires:
   List::Util: 0
   POSIX: 0
   XML::LibXML: 1.70
-  perl: v5.10.0
+  perl: v5.10.1
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.02
+version: 0.03

@@ -1,3 +1,10 @@
+Travel::Status::DE::DeutscheBahn 0.03 - Wed Jul 13 2011
+
+    * Clarify derl dependency (we actually need >= 5.10.1)
+
+    [Travel::Status::DE::DeutscheBahn]
+    * Strip leading / trailing whitespace in result fields
+
 Travel::Status::DE::DeutscheBahn 0.02 - Wed Jul 06 2011
 
     [db-ris]

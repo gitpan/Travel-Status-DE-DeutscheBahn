@@ -10,7 +10,7 @@ use POSIX qw(strftime);
 use Travel::Status::DE::DeutscheBahn::Result;
 use XML::LibXML;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 sub new {
 	my ( $obj, %conf ) = @_;
@@ -62,7 +62,7 @@ sub new {
 		confess("Could not submit POST request: ${errstr}");
 	}
 
-	$ref->{html} = $reply->content();
+	$ref->{html} = $reply->content;
 
 	$ref->{tree} = XML::LibXML->load_html(
 		string            => $ref->{html},
@@ -138,6 +138,8 @@ sub results {
 		for my $str ( $time, $train, $dest, $platform, $info ) {
 			$str =~ s/\n/ /mg;
 			$str =~ tr/ //s;
+			$str =~ s/^ +//;
+			$str =~ s/ +$//;
 		}
 
 		$info =~ s{ ,Grund }{}ox;
@@ -203,7 +205,7 @@ arrival/departure monitor
 
 =head1 VERSION
 
-version 0.02
+version 0.03
 
 =head1 DESCRIPTION
 
