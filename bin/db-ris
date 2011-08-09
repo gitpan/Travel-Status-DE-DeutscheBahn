@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use 5.010;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use Getopt::Long qw(:config no_ignore_case);
 use List::Util qw(first max);
@@ -84,6 +84,11 @@ sub display_result {
 	return;
 }
 
+if ( my $err = $status->errstr ) {
+	say "Request error: ${err}";
+	exit 2;
+}
+
 for my $d ( $status->results() ) {
 
 	my @via;
@@ -123,7 +128,7 @@ B<db-ris> [B<-d> I<date>] [B<-L>] [B<-m> I<motlist>] [B<-t> I<time>]
 
 =head1 VERSION
 
-version 0.04
+version 0.05
 
 =head1 DESCRIPTION
 
