@@ -10,7 +10,7 @@ use POSIX qw(strftime);
 use Travel::Status::DE::DeutscheBahn::Result;
 use XML::LibXML;
 
-our $VERSION = '0.05';
+our $VERSION = '1.00';
 
 sub new {
 	my ( $obj, %conf ) = @_;
@@ -117,8 +117,8 @@ sub results {
 	my $xp_info = XML::LibXML::XPathExpression->new('./td[@class="ris"]');
 
 	my $re_via = qr{
-		^ \s* (.+?) \s* \n
-		\d{1,2}:\d{1,2}
+		^ \s* (?<stop> .+? ) \s* \n
+		(?<time> \d{1,2}:\d{1,2} )
 	}mx;
 
 	if ( defined $self->{results} ) {
@@ -127,6 +127,8 @@ sub results {
 	if ( not defined $self->{tree} ) {
 		return;
 	}
+
+	$self->{results} = [];
 
 	for my $tr ( @{ $self->{tree}->findnodes($xp_element) } ) {
 
@@ -146,7 +148,7 @@ sub results {
 		my $train    = $n_train->textContent();
 		my $route    = $n_route->textContent();
 		my $dest     = $n_dest->textContent();
-		my $platform = $n_platform->textContent();
+		my $platform = $n_platform ? $n_platform->textContent() : q{};
 		my $info     = $n_info ? $n_info->textContent() : q{};
 		my @via;
 
@@ -162,13 +164,12 @@ sub results {
 				$first = 0;
 				next;
 			}
-			my $stop = $1;
 
-			if ( $stop =~ m{ [(] Halt \s entf.llt [)] }ox ) {
+			if ( $+{stop} =~ m{ [(] Halt \s entf.llt [)] }ox ) {
 				next;
 			}
 
-			push( @via, $stop );
+			push( @via, [ $+{time}, $+{stop} ] );
 		}
 
 		push(
@@ -221,7 +222,7 @@ arrival/departure monitor
 
 =head1 VERSION
 
-version 0.05
+version 1.00
 
 =head1 DESCRIPTION
 

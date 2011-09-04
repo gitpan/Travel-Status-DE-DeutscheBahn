@@ -18,10 +18,10 @@ name: Travel-Status-DE-DeutscheBahn
 provides:
   Travel::Status::DE::DeutscheBahn:
     file: lib/Travel/Status/DE/DeutscheBahn.pm
-    version: 0.05
+    version: 1.00
   Travel::Status::DE::DeutscheBahn::Result:
     file: lib/Travel/Status/DE/DeutscheBahn/Result.pm
-    version: 0.05
+    version: 1.00
 requires:
   Carp: 0
   Class::Accessor: 0.16
@@ -33,4 +33,4 @@ requires:
   perl: v5.10.1
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.05
+version: 1.00

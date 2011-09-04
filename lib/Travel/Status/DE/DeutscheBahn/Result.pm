@@ -6,7 +6,7 @@ use 5.010;
 
 use parent 'Class::Accessor';
 
-our $VERSION = '0.05';
+our $VERSION = '1.00';
 
 Travel::Status::DE::DeutscheBahn::Result->mk_ro_accessors(
 	qw(time train route_end route_raw platform info_raw));
@@ -62,7 +62,8 @@ sub origin {
 sub route {
 	my ($self) = @_;
 
-	return @{ $self->{route} };
+	my @stops = map { $_->[1] } @{ $self->{route} };
+	return @stops;
 }
 
 sub route_interesting {
@@ -115,6 +116,12 @@ sub route_interesting {
 
 }
 
+sub route_timetable {
+	my ($self) = @_;
+
+	return @{ $self->{route} };
+}
+
 1;
 
 __END__
@@ -149,7 +156,7 @@ arrival/departure received by Travel::Status::DE::DeutscheBahn
 
 =head1 VERSION
 
-version 0.05
+version 1.00
 
 =head1 DESCRIPTION
 
@@ -216,6 +223,11 @@ Returns the raw string used to create the route array.
 
 Note that canceled stops are filtered from B<route>, but still present in
 B<route_raw>.
+
+=item $result->route_timetable
+
+Similar to B<route>.  however, this function returns a list of array
+references of the form C<< [ arrival time, station name ] >>.
 
 =item $result->time
 
