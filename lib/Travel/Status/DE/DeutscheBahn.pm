@@ -10,7 +10,7 @@ use POSIX qw(strftime);
 use Travel::Status::DE::DeutscheBahn::Result;
 use XML::LibXML;
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 sub new {
 	my ( $obj, %conf ) = @_;
@@ -20,6 +20,8 @@ sub new {
 	my $ua = LWP::UserAgent->new();
 
 	my $reply;
+
+	my $lang = $conf{language} // 'd';
 
 	if ( not $conf{station} ) {
 		confess('You need to specify a station');
@@ -43,8 +45,10 @@ sub new {
 			date                => $conf{date} || $date,
 			time                => $conf{time} || $time,
 			REQTrain_name       => q{},
-			start               => 'Suchen',
+			start               => 'yes',
 			boardType           => $conf{mode} // 'dep',
+
+			#			L                   => 'vs_java3',
 		},
 	};
 
@@ -56,7 +60,9 @@ sub new {
 
 	bless( $ref, $obj );
 
-	$reply = $ua->post( 'http://reiseauskunft.bahn.de/bin/bhftafel.exe/dn?rt=1',
+	$reply
+	  = $ua->post(
+		"http://reiseauskunft.bahn.de/bin/bhftafel.exe/${lang}n?rt=1",
 		$ref->{post} );
 
 	if ( $reply->is_error ) {
@@ -72,6 +78,8 @@ sub new {
 		suppress_errors   => 1,
 		suppress_warnings => 1,
 	);
+
+	$ref->check_input_error();
 
 	return $ref;
 }
@@ -96,10 +104,53 @@ sub new_from_html {
 	return bless( $ref, $obj );
 }
 
+sub check_input_error {
+	my ($self) = @_;
+
+	my $xp_errdiv = XML::LibXML::XPathExpression->new(
+		'//div[@class = "errormsg leftMargin"]');
+	my $xp_opts
+	  = XML::LibXML::XPathExpression->new('//select[@class = "error"]');
+	my $xp_values = XML::LibXML::XPathExpression->new('./option');
+
+	my $e_errdiv = ( $self->{tree}->findnodes($xp_errdiv) )[0];
+	my $e_opts   = ( $self->{tree}->findnodes($xp_opts) )[0];
+
+	if ($e_errdiv) {
+		$self->{errstr} = $e_errdiv->textContent;
+
+		if ($e_opts) {
+			my @nodes = ( $e_opts->findnodes($xp_values) );
+			$self->{errstr}
+			  .= join( q{}, map { "\n" . $_->textContent } @nodes );
+		}
+	}
+
+	return;
+}
+
 sub errstr {
 	my ($self) = @_;
 
 	return $self->{errstr};
+}
+
+sub get_node {
+	my ( $parent, $name, $xpath, $index ) = @_;
+	$index //= 0;
+
+	my @nodes = $parent->findnodes($xpath);
+
+	if ( $#nodes < $index ) {
+
+		# called by map, so we must explicitly return undef.
+		## no critic (Subroutines::ProhibitExplicitReturnUndef)
+		return undef;
+	}
+
+	my $node = $nodes[$index];
+
+	return $node->textContent;
 }
 
 sub results {
@@ -107,14 +158,23 @@ sub results {
 	my $mode = $self->{post}->{boardType};
 
 	my $xp_element = XML::LibXML::XPathExpression->new(
-		"//table[\@class=\"result stboard ${mode}\"]/tr");
-	my $xp_time  = XML::LibXML::XPathExpression->new('./td[@class="time"]');
-	my $xp_train = XML::LibXML::XPathExpression->new('./td[@class="train"]');
-	my $xp_route = XML::LibXML::XPathExpression->new('./td[@class="route"]');
-	my $xp_dest  = XML::LibXML::XPathExpression->new('./td[@class="route"]//a');
-	my $xp_platform
-	  = XML::LibXML::XPathExpression->new('./td[@class="platform"]');
-	my $xp_info = XML::LibXML::XPathExpression->new('./td[@class="ris"]');
+		"//table[\@class = \"result stboard ${mode}\"]/tr");
+	my $xp_train_more = XML::LibXML::XPathExpression->new('./td[3]/a');
+
+	# bhftafel.exe is not y2k1-safe
+	my $re_morelink = qr{ date = (?<date> .. [.] .. [.] .. ) }x;
+
+	my @parts = (
+		[ 'time',     './td[@class="time"]' ],
+		[ 'train',    './td[3]' ],
+		[ 'route',    './td[@class="route"]' ],
+		[ 'dest',     './td[@class="route"]//a' ],
+		[ 'platform', './td[@class="platform"]' ],
+		[ 'info',     './td[@class="ris"]' ],
+	);
+
+	@parts = map { [ $_->[0], XML::LibXML::XPathExpression->new( $_->[1] ) ] }
+	  @parts;
 
 	my $re_via = qr{
 		^ \s* (?<stop> .+? ) \s* \n
@@ -132,25 +192,24 @@ sub results {
 
 	for my $tr ( @{ $self->{tree}->findnodes($xp_element) } ) {
 
-		my ($n_time) = $tr->findnodes($xp_time);
-		my ( undef, $n_train ) = $tr->findnodes($xp_train);
-		my ($n_route)    = $tr->findnodes($xp_route);
-		my ($n_dest)     = $tr->findnodes($xp_dest);
-		my ($n_platform) = $tr->findnodes($xp_platform);
-		my ($n_info)     = $tr->findnodes($xp_info);
-		my $first        = 1;
+		my @via;
+		my $first = 1;
+		my ( $time, $train, $route, $dest, $platform, $info )
+		  = map { get_node( $tr, @{$_} ) } @parts;
+		my $e_train_more = ( $tr->findnodes($xp_train_more) )[0];
 
-		if ( not( $n_time and $n_dest ) ) {
+		if ( not( $time and $dest ) ) {
 			next;
 		}
 
-		my $time     = $n_time->textContent();
-		my $train    = $n_train->textContent();
-		my $route    = $n_route->textContent();
-		my $dest     = $n_dest->textContent();
-		my $platform = $n_platform ? $n_platform->textContent() : q{};
-		my $info     = $n_info ? $n_info->textContent() : q{};
-		my @via;
+		$e_train_more->getAttribute('href') =~ $re_morelink;
+
+		my $date = $+{date};
+
+		substr( $date, 6, 0 ) = '20';
+
+		$platform //= q{};
+		$info     //= q{};
 
 		for my $str ( $time, $train, $dest, $platform, $info ) {
 			$str =~ s/\n/ /mg;
@@ -175,6 +234,7 @@ sub results {
 		push(
 			@{ $self->{results} },
 			Travel::Status::DE::DeutscheBahn::Result->new(
+				date      => $date,
 				time      => $time,
 				train     => $train,
 				route_raw => $route,
@@ -214,7 +274,7 @@ arrival/departure monitor
 		printf(
 			"At %s: %s to %s from platform %s\n",
 			$departure->time,
-			$departure->train,
+			$departure->line,
 			$departure->destination,
 			$departure->platform,
 		);
@@ -222,7 +282,7 @@ arrival/departure monitor
 
 =head1 VERSION
 
-version 1.00
+version 1.01
 
 =head1 DESCRIPTION
 
@@ -250,11 +310,17 @@ Supported I<opts> are:
 
 =item B<station> => I<station>
 
-The train station to report for, e.g.  "Essen HBf".  Mandatory.
+The train station to report for, e.g.  "Essen HBf" or
+"Alfredusbad, Essen (Ruhr)".  Mandatory.
 
 =item B<date> => I<dd>.I<mm>.I<yyyy>
 
 Date to report for.  Defaults to the current day.
+
+=item B<language> => I<language>
+
+Set language for additional information. Accepted arguments: B<d>eutsch,
+B<e>nglish, B<i>talian, B<n> (dutch).
 
 =item B<time> => I<hh>:I<mm>
 

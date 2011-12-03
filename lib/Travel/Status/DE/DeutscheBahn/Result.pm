@@ -6,10 +6,10 @@ use 5.010;
 
 use parent 'Class::Accessor';
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 Travel::Status::DE::DeutscheBahn::Result->mk_ro_accessors(
-	qw(time train route_end route_raw platform info_raw));
+	qw(date time train route_end route_raw platform info_raw));
 
 sub new {
 	my ( $obj, %conf ) = @_;
@@ -25,6 +25,12 @@ sub destination {
 	return $self->{route_end};
 }
 
+sub line {
+	my ($self) = @_;
+
+	return $self->{train};
+}
+
 sub info {
 	my ($self) = @_;
 
@@ -32,7 +38,8 @@ sub info {
 
 	$info =~ s{ ,Grund }{}ox;
 	$info =~ s{ ^ \s+ }{}ox;
-	$info =~ s{ (?: ^ | , ) (?: p.nktlich | k [.] A [.] ) }{}ox;
+	$info
+	  =~ s{ (?: ^ | , ) (?: p.nktlich | [nk] [.] [Aa] [.] | on \s time ) }{}ox;
 	$info =~ s{ ^ , }{}ox;
 
 	return $info;
@@ -137,7 +144,7 @@ arrival/departure received by Travel::Status::DE::DeutscheBahn
 		printf(
 			"At %s: %s to %s from platform %s\n",
 			$departure->time,
-			$departure->train,
+			$departure->line,
 			$departure->destination,
 			$departure->platform,
 		);
@@ -148,7 +155,7 @@ arrival/departure received by Travel::Status::DE::DeutscheBahn
 		printf(
 			"At %s: %s from %s on platform %s\n",
 			$arrival->time,
-			$arrival->train,
+			$arrival->line,
 			$arrival->origin,
 			$arrival->platform,
 		);
@@ -156,7 +163,7 @@ arrival/departure received by Travel::Status::DE::DeutscheBahn
 
 =head1 VERSION
 
-version 1.00
+version 1.01
 
 =head1 DESCRIPTION
 
@@ -170,6 +177,36 @@ the platform, time, route and more.
 
 =over
 
+=item $result->date
+
+Arrival/Departure date in "dd.mm.yyyy" format.
+
+=item $result->delay
+
+Returns the train's delay in minutes, or undef if it is unknown.
+
+=item $result->info
+
+Returns additional information, for instance the reason why the train is
+delayed. May be an empty string if no (useful) information is available.
+
+=item $result->line
+
+=item $result->train
+
+Returns the line name, either in a format like "S 1" (S-Bahn line 1)
+or "RE 10111" (RegionalExpress train 10111, no line information).
+
+=item $result->platform
+
+Returns the platform from which the train will depart / at which it will
+arrive.
+
+=item $result->route
+
+Returns a list of station names the train will pass between the selected
+station and its origin/destination.
+
 =item $result->route_end
 
 Returns the last element of the route.  Depending on how you set up
@@ -181,25 +218,6 @@ either the train's destination or its origin station.
 =item $result->origin
 
 Convenience aliases for $result->route_end.
-
-=item $result->delay
-
-Returns the train's delay in minutes, or undef if it is unknown.
-
-=item $result->info
-
-Returns additional information, for instance the reason why the train is
-delayed. May be an empty string if no (useful) information is available.
-
-=item $result->platform
-
-Returns the platform from which the train will depart / at which it will
-arrive.
-
-=item $result->route
-
-Returns a list of station names the train will pass between the selected
-station and its origin/destination.
 
 =item $result->route_interesting([I<max>])
 
@@ -232,11 +250,6 @@ references of the form C<< [ arrival time, station name ] >>.
 =item $result->time
 
 Returns the arrival/departure time as string in "hh:mm" format.
-
-=item $result->train
-
-Returns the line / train name, either in a format like "S 1" (S-Bahn line 1)
-or "RE 10111" (RegionalExpress train 10111, no line information).
 
 =back
 
@@ -285,7 +298,7 @@ None.
 
 =head1 BUGS AND LIMITATIONS
 
-Arrival times are present in B<route_raw>, but not accessible via B<route>.
+None known.
 
 =head1 SEE ALSO
 

@@ -1,0 +1,60 @@
+{
+   "abstract" : "Interface to the DeutscheBahn online\narrival/departure monitor",
+   "author" : [
+      "Copyright (C) 2011 by Daniel Friesel E<lt>derf@finalrewind.orgE<gt>"
+   ],
+   "dynamic_config" : 1,
+   "generated_by" : "Module::Build version 0.38, CPAN::Meta::Converter version 2.110440",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Travel-Status-DE-DeutscheBahn",
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "File::Slurp" : 0,
+            "Test::Compile" : 0,
+            "Test::More" : 0,
+            "Test::Pod" : 0
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "Module::Build" : "0.38"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "Carp" : 0,
+            "Class::Accessor" : "0.16",
+            "Getopt::Long" : 0,
+            "LWP::UserAgent" : 0,
+            "List::Util" : 0,
+            "POSIX" : 0,
+            "XML::LibXML" : "1.70",
+            "perl" : "v5.10.1"
+         }
+      }
+   },
+   "provides" : {
+      "Travel::Status::DE::DeutscheBahn" : {
+         "file" : "lib/Travel/Status/DE/DeutscheBahn.pm",
+         "version" : "1.01"
+      },
+      "Travel::Status::DE::DeutscheBahn::Result" : {
+         "file" : "lib/Travel/Status/DE/DeutscheBahn/Result.pm",
+         "version" : "1.01"
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "license" : [
+         "http://dev.perl.org/licenses/"
+      ]
+   },
+   "version" : "1.01"
+}
