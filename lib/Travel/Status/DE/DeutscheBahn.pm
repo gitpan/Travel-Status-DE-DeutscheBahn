@@ -4,13 +4,15 @@ use strict;
 use warnings;
 use 5.010;
 
+no if $] >= 5.018, warnings => "experimental::smartmatch";
+
 use Carp qw(confess);
 use LWP::UserAgent;
 use POSIX qw(strftime);
 use Travel::Status::DE::DeutscheBahn::Result;
 use XML::LibXML;
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
 sub new {
 	my ( $obj, %conf ) = @_;
@@ -18,6 +20,8 @@ sub new {
 	my $time = strftime( '%H:%M',    localtime(time) );
 
 	my $ua = LWP::UserAgent->new();
+
+	$ua->env_proxy;
 
 	my $reply;
 
@@ -282,7 +286,7 @@ arrival/departure monitor
 
 =head1 VERSION
 
-version 1.01
+version 1.02
 
 =head1 DESCRIPTION
 

@@ -5,7 +5,6 @@ COPYING
 lib/Travel/Status/DE/DeutscheBahn.pm
 lib/Travel/Status/DE/DeutscheBahn/Result.pm
 MANIFEST			This list of files
-notes
 README
 t/00-compile-pm.t
 t/01-compile-pl.t
