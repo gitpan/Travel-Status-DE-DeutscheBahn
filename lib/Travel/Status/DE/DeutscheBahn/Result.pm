@@ -8,7 +8,7 @@ no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 use parent 'Class::Accessor';
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 Travel::Status::DE::DeutscheBahn::Result->mk_ro_accessors(
 	qw(date time train route_end route_raw platform info_raw));
@@ -55,7 +55,7 @@ sub delay {
 	if ( $info =~ m{ p.nktlich }ox ) {
 		return 0;
 	}
-	if ( $info =~ m{ ca[.] \s (?<delay> \d+ ) \s Minuten \s sp.ter }ox ) {
+	if ( $info =~ m{ (?: ca \. \s* )? \+ (?<delay> \d+) :? \s* }ox ) {
 		return $+{delay};
 	}
 
@@ -131,6 +131,12 @@ sub route_timetable {
 	return @{ $self->{route} };
 }
 
+sub TO_JSON {
+	my ($self) = @_;
+
+	return { %{$self} };
+}
+
 1;
 
 __END__
@@ -165,7 +171,7 @@ arrival/departure received by Travel::Status::DE::DeutscheBahn
 
 =head1 VERSION
 
-version 1.02
+version 1.03
 
 =head1 DESCRIPTION
 
